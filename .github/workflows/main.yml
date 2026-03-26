@@ -1,0 +1,37 @@
+# 每日股票分析 - GitHub Actions 自动化配置
+name: Daily Stock Analysis
+
+# 触发规则：每天自动运行 + 手动点击运行
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天UTC 0点运行（北京时间8点）
+  workflow_dispatch:    # 允许手动点击运行
+
+# 云端运行任务
+jobs:
+  run-analysis:
+    runs-on: ubuntu-latest  # 云端使用Linux系统（自带Python）
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 设置Python环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'  # 云端自动安装Python
+
+      - name: 安装项目依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 运行股票分析程序
+        run: python main.py
+
+      - name: 上传分析结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-result
+          path: |
+            *.csv
+            *.png
